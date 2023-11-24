@@ -127,7 +127,7 @@ sudo nala install -y libio-all-perl libdatetime-perl libdbd-sqlite3-perl
 # Network tools
 ##################################################
 # Wireshark
-sudo DEBIAN_FRONTEND=noninteractive nala -y install wireshark
+sudo DEBIAN_FRONTEND=noninteractive nala install -y wireshark
 # TODO: clone profiles
 
 ##################################################
