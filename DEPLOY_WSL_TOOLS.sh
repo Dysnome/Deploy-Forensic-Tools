@@ -10,7 +10,7 @@ sudo apt update
 sudo apt install -y nala
 
 # Install base tools
-sudo nala install -y python3 python3-pip libpython3.10-dev python2 python2-dev libpython2.7-dev binwalk exiftool csvkit tree curl git wget build-essential libssl-dev unrar nmap whois p7zip-full sqlitebrowser ruby-dev pngtools pngcheck yara ltrace btop htop qemu-utils jq sqlite3
+sudo nala install -y python3 python3-pip libpython3.10-dev python2 python2-dev libpython2.7-dev binwalk exiftool csvkit tree curl git wget build-essential libssl-dev unrar nmap whois p7zip-full sqlitebrowser ruby-dev pngtools pngcheck yara ltrace btop htop qemu-utils jq fq sqlite3
 
 # Some fancy improvement
 sudo nala install -y fonts-powerline
@@ -129,6 +129,13 @@ sudo nala install -y libio-all-perl libdatetime-perl libdbd-sqlite3-perl
 # Wireshark
 sudo DEBIAN_FRONTEND=noninteractive nala install -y wireshark
 # TODO: clone profiles
+
+# NetFlow
+## RITA
+#cd /tmp
+#wget https://github.com/activecm/rita/releases/download/v4.8.0/install.sh
+#chmod +x install.sh
+#sudo ./install.sh
 
 ##################################################
 # Email tools
@@ -259,5 +266,6 @@ function docker-explorer(){
 EOT
 
 # Switch shell
+printf "Change default shell to Zsh. Please enter your password to confirm the change."
 chsh -s /bin/zsh
 zsh
