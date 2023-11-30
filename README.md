@@ -12,12 +12,12 @@ You can use either `curl` or `wget` to download and execute the installation scr
 #### Using curl
 
 ```bash
-bash -c "curl -fsSL https://raw.githubusercontent.com/Dysnome/Deploy-Forensic-Tools/main/DEPLOY_WSL_TOOLS.sh"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Dysnome/Deploy-Forensic-Tools/main/DEPLOY_WSL_TOOLS.sh)"
 ```
 
 #### Using wget
 ```bash
-bash -c "wget https://raw.githubusercontent.com/Dysnome/Deploy-Forensic-Tools/main/DEPLOY_WSL_TOOLS.sh -O -"
+bash -c "$(wget https://raw.githubusercontent.com/Dysnome/Deploy-Forensic-Tools/main/DEPLOY_WSL_TOOLS.sh -O -)"
 ```
 This script will automatically download and configure the necessary forensic tools on your system.
 
