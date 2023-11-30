@@ -1,6 +1,7 @@
 #!/bin/bash
 # Debug
 set -e
+cd $HOME
 
 # Get 3rd party tools in /opt
 sudo chown $USER:$USER /opt
