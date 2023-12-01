@@ -1,4 +1,10 @@
 #!/bin/bash
+
+# CHANGELOG
+# 2023-12-01: add ghex
+
+
+
 # Debug
 set -e
 cd $HOME
@@ -11,7 +17,7 @@ sudo apt update
 sudo apt install -y nala
 
 # Install base tools
-sudo nala install -y python3 python3-pip libpython3.10-dev python2 python2-dev libpython2.7-dev binwalk exiftool csvkit tree curl git wget build-essential libssl-dev unrar nmap whois p7zip-full sqlitebrowser ruby-dev pngtools pngcheck yara ltrace btop htop qemu-utils jq fq sqlite3
+sudo nala install -y python3 python3-pip libpython3.10-dev python2 python2-dev libpython2.7-dev binwalk exiftool csvkit tree curl git wget build-essential libssl-dev unrar nmap whois p7zip-full sqlitebrowser ruby-dev pngtools pngcheck yara ltrace btop htop qemu-utils jq fq sqlite3 ghex
 
 # Some fancy improvement
 sudo nala install -y fonts-powerline
