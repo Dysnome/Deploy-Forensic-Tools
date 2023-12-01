@@ -267,6 +267,6 @@ function docker-explorer(){
 EOT
 
 # Switch shell
-printf "Change default shell to Zsh. Please enter your password to confirm the change."
+printf "Change default shell to Zsh. Please enter your password to confirm the change.\n"
 chsh -s /bin/zsh
 zsh
