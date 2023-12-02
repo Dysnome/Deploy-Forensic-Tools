@@ -135,7 +135,8 @@ sudo nala install -y libio-all-perl libdatetime-perl libdbd-sqlite3-perl
 ##################################################
 # Wireshark
 sudo DEBIAN_FRONTEND=noninteractive nala install -y wireshark
-# TODO: clone profiles
+# Wireshark profiles
+# git clone the repo and put all profiles folder into ~/.config/wireshark/profiles
 
 # NetFlow
 ## RITA
