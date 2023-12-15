@@ -234,6 +234,13 @@ pip install pycryptodome
 deactivate
 
 ##################################################
+# NTFS analysis
+##################################################
+cd /opt
+git clone https://github.com/dkovar/analyzeMFT
+
+
+##################################################
 # Add 3rd party tools to PATH + some setups
 ##################################################
 cat <<EOT >> ~/.zshrc
@@ -244,6 +251,7 @@ path+=('/opt/rdpieces/')
 path+=('/opt/WMI_Forensics')
 path+=('/opt/container-explorer/bin/')
 path+=('$HOME/.cargo/bin/')
+path+=('/opt/analyzeMFT')
 
 alias peepdf="python2 /opt/peepdf/peepdf.py \$@"
 alias john="/opt/john/run/john"
