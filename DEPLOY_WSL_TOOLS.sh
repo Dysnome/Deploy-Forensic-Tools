@@ -174,6 +174,13 @@ cargo build --release
 cd /opt/EVTX_tools
 git clone https://github.com/SigmaHQ/sigma
 
+# Hayabusa
+cd /opt/EVTX_tools
+git clone https://github.com/Yamato-Security/hayabusa --recursive
+cd hayabusa
+cargo build --release
+
+
 ##################################################
 # PDF tools
 ##################################################
