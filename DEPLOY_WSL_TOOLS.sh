@@ -259,6 +259,8 @@ path+=('/opt/WMI_Forensics')
 path+=('/opt/container-explorer/bin/')
 path+=('$HOME/.cargo/bin/')
 path+=('/opt/analyzeMFT')
+# ADD CHAINSAW
+# ADD HAYABUSA
 
 alias peepdf="python2 /opt/peepdf/peepdf.py \$@"
 alias john="/opt/john/run/john"
