@@ -184,13 +184,20 @@ cargo build --release
 ##################################################
 # PDF tools
 ##################################################
+mkdir /opt/pdf
+
 # poppler-utils: pdfinfo, pdfsig, pdftotext, etc
 sudo nala install -y poppler-utils
 
 # peepdf
-cd /opt
+cd /opt/pdf
 git clone https://github.com/jesparza/peepdf
 chmod +x peepdf/*.py
+
+# pdfplumber
+cd /opt/pdf
+git clone https://github.com/jsvine/pdfplumber
+sudo python3 pdfplumber/setup.py install
 
 ##################################################
 # Password cracking
