@@ -85,7 +85,7 @@ EOF
 
 # Setup ZSH
 sudo nala install -y zsh
-OH_MY_ZSH_FOLDER="~/.oh-my-zsh"
+OH_MY_ZSH_FOLDER="$HOME/.oh-my-zsh"
 echo "Check if oh-my-zsh folder exists"
 if [ -d "$OH_MY_ZSH_FOLDER" ]; then
     # If it exists, delete the folder
