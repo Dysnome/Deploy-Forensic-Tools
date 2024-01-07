@@ -147,7 +147,6 @@ TOOL_PATH="/opt/RDP_tools"
 mkdir -p $TOOL_PATH
 
 # BMC tools
-cd $TOOL_PATH
 TARGET_FOLDER="$TOOL_PATH/bmc-tools"
 if [ -d "$TARGET_FOLDER" ]; then
   echo "Tool '$TARGET_FOLDER' already exists. Updating..."
@@ -156,8 +155,6 @@ if [ -d "$TARGET_FOLDER" ]; then
 else
   git clone https://github.com/ANSSI-FR/bmc-tools $TARGET_FOLDER
 fi
-
-
 
 # rdpieces
 cd /opt
@@ -171,6 +168,7 @@ sudo nala install -y libio-all-perl libdatetime-perl libdbd-sqlite3-perl
 sudo DEBIAN_FRONTEND=noninteractive nala install -y wireshark
 # Wireshark profiles
 # git clone the repo and put all profiles folder into ~/.config/wireshark/profiles
+# https://github.com/Dysnome/Wireshark-Profiles
 
 # NetFlow
 ## RITA
