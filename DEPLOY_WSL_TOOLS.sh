@@ -26,6 +26,7 @@ sudo nala install -y fonts-powerline
 # Setup python environments (I need python 2 & 3 to run all forensic tools)
 TARGET_LINK="/usr/bin/python"
 SOURCE_LINK="/usr/bin/python3"
+echo "Testing Python3 symbolic link"
 if [ -L "$TARGET_LINK" ]; then
     echo "Symbolic link '$TARGET_LINK' already exists. Skipping..."
 else
