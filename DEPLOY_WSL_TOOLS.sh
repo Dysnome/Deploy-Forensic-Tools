@@ -86,16 +86,13 @@ EOF
 # Setup ZSH
 sudo nala install -y zsh
 OH_MY_ZSH_FOLDER="$HOME/.oh-my-zsh"
-echo "Check if oh-my-zsh folder exists"
+echo "Checking if the oh-my-zsh folder already exists..."
 if [ -d "$OH_MY_ZSH_FOLDER" ]; then
-    # If it exists, delete the folder
-    rm -r "$OH_MY_ZSH_FOLDER"
-    echo "Folder '$OH_MY_ZSH_FOLDERR' exists and has been deleted successfully."
+    echo "The '$OH_MY_ZSH_FOLDER' folder already exists. Skipping the installation of oh-my-zsh..."
 else
-    # If it doesn't exist, print a message
-    echo "Folder '$OH_MY_ZSH_FOLDER' does not exist. Nothing to delete prior installation of oh-my-zsh."
+    echo "The '$OH_MY_ZSH_FOLDER' folder does not exist. Proceeding with the installation of oh-my-zsh..."
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 fi
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="steeef"/g' ~/.zshrc
 #source ~/.zshrc
 
