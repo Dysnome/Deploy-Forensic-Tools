@@ -150,10 +150,12 @@ mkdir -p $TOOL_PATH
 cd $TOOL_PATH
 TARGET_FOLDER="$TOOL_PATH/bmc-tools"
 if [ -d "$TARGET_FOLDER" ]; then
-    echo "Tool '$TARGET_FOLDER' already exists. Removing it before cloning..."
-    rm -rf "$TARGET_FOLDER"
+  echo "Tool '$TARGET_FOLDER' already exists. Updating..."
+  cd $TARGET_FOLDER
+  git pull
+else
+  git clone https://github.com/ANSSI-FR/bmc-tools $TARGET_FOLDER
 fi
-git clone https://github.com/ANSSI-FR/bmc-tools $TARGET_FOLDER
 
 
 
