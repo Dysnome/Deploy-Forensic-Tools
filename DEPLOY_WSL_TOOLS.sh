@@ -24,7 +24,20 @@ sudo nala install -y python3 python3-pip libpython3.10-dev python2 python2-dev l
 sudo nala install -y fonts-powerline
 
 # Setup python environments (I need python 2 & 3 to run all forensic tools)
-sudo ln -s /usr/bin/python3 /usr/bin/python
+TARGET_LINK="/usr/bin/python"
+SOURCE_LINK="/usr/bin/python3"
+if [ -L "$TARGET_LINK" ]; then
+    echo "Symbolic link '$TARGET_LINK' already exists. Skipping..."
+else
+    sudo ln -s "$SOURCE_LINK" "$TARGET_LINK"
+    
+    # Check the exit status of the ln command
+    if [ $? -eq 0 ]; then
+        echo "Symbolic link created successfully: $TARGET_LINK -> $SOURCE_LINK"
+    else
+        echo "Failed to create symbolic link: $TARGET_LINK. Check for errors."
+    fi
+fi
 mkdir -p /home/$USER/venvs
 curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output /tmp/get-pip.py
 sudo python2 /tmp/get-pip.py
