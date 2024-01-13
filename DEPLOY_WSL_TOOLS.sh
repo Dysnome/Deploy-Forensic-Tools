@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# CHANGELOG
-# 2023-12-01: add ghex, cmake
-# 2023-12-06: add clamav
-
-
-
 # Debug
 set -e
 cd $HOME
@@ -153,7 +147,8 @@ if [ -d "$TARGET_FOLDER" ]; then
   cd $TARGET_FOLDER
   git pull
 else
-  git clone https://github.com/ANSSI-FR/bmc-tools $TARGET_FOLDER
+  cd $TOOL_PATH
+  git clone https://github.com/ANSSI-FR/bmc-tools
 fi
 
 # rdpieces
