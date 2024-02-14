@@ -7,37 +7,41 @@ sudo chown $USER:$USER /opt
 
 install_base_baseline_tools(){
   echo "Installing baseline tools"
-  sudo apt update
-  sudo apt install -y nala
-  sudo nala install -y python3 python3-pip libpython3.10-dev python2 python2-dev libpython2.7-dev binwalk exiftool csvkit tree curl git wget build-essential libssl-dev unrar nmap whois p7zip-full sqlitebrowser ruby-dev pngtools pngcheck yara ltrace btop htop qemu-utils jq fq sqlite3 ghex cmake pkg-config libsecret-1-dev clamav ffmpeg fdisk testdisk extundelete bat
-  sudo nala install -y fonts-powerline
+  {
+    sudo apt update
+    sudo apt install -y nala
+    sudo nala install -y python3 python3-pip libpython3.10-dev python2 python2-dev libpython2.7-dev binwalk exiftool csvkit tree curl git wget build-essential libssl-dev unrar nmap whois p7zip-full sqlitebrowser ruby-dev pngtools pngcheck yara ltrace btop htop qemu-utils jq fq sqlite3 ghex cmake pkg-config libsecret-1-dev clamav ffmpeg fdisk testdisk extundelete bat
+    sudo nala install -y fonts-powerline
+  } 2> /dev/null
 }
 
 install_base_python_environments(){
   # Setup python environments (I need python 2 & 3 to run all forensic tools)
   echo "Setting up Python 2 & 3 environments"
-  TARGET_LINK="/usr/bin/python"
-  SOURCE_LINK="/usr/bin/python3"
-  echo "Testing Python3 symbolic link"
-  if [ -L "$TARGET_LINK" ]; then
-      echo "Symbolic link '$TARGET_LINK' already exists. Skipping..."
-  else
-      sudo ln -s "$SOURCE_LINK" "$TARGET_LINK"
-      
-      # Check the exit status of the ln command
-      if [ $? -eq 0 ]; then
-          echo "Symbolic link created successfully: $TARGET_LINK -> $SOURCE_LINK"
-      else
-          echo "Failed to create symbolic link: $TARGET_LINK. Check for errors."
-      fi
-  fi
+  {
+    TARGET_LINK="/usr/bin/python"
+    SOURCE_LINK="/usr/bin/python3"
+    echo "Testing Python3 symbolic link"
+    if [ -L "$TARGET_LINK" ]; then
+        echo "Symbolic link '$TARGET_LINK' already exists. Skipping..."
+    else
+        sudo ln -s "$SOURCE_LINK" "$TARGET_LINK"
+        
+        # Check the exit status of the ln command
+        if [ $? -eq 0 ]; then
+            echo "Symbolic link created successfully: $TARGET_LINK -> $SOURCE_LINK"
+        else
+            echo "Failed to create symbolic link: $TARGET_LINK. Check for errors."
+        fi
+    fi
 
-  mkdir -p $VENVS_PATH
-  curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output /tmp/get-pip.py
-  sudo python2 /tmp/get-pip.py
-  rm /tmp/get-pip.py
-  python2 -m pip install virtualenv
-  python3 -m pip install virtualenv
+    mkdir -p $VENVS_PATH
+    curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output /tmp/get-pip.py
+    sudo python2 /tmp/get-pip.py
+    rm /tmp/get-pip.py
+    python2 -m pip install virtualenv
+    python3 -m pip install virtualenv
+  } 2> /dev/null
 }
 
 install_base_rust(){
@@ -105,9 +109,11 @@ install_base_sublime_text(){
 
 install_steg_stegoveritas(){
   echo "Setting up Stegoveritas"
-  sudo python3 -m pip install stegoveritas
-  stegoveritas_install_deps
-  # => TODO: fix error messages
+  {
+    sudo python3 -m pip install stegoveritas
+    stegoveritas_install_deps
+    # => TODO: fix error messages
+  } 2> /dev/null
 }
 
 install_steg_stegseek(){
