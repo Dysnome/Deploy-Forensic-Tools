@@ -5,15 +5,15 @@ VENVS_PATH="/opt/venvs"
 # Get 3rd party tools in /opt
 sudo chown $USER:$USER /opt
 
-install_baseline_tools() {
+install_base_baseline_tools(){
   echo "Installing baseline tools"
   sudo apt update
   sudo apt install -y nala
-  sudo nala install -y python3 python3-pip libpython3.10-dev python2 python2-dev libpython2.7-dev binwalk exiftool csvkit tree curl git wget build-essential libssl-dev unrar nmap whois p7zip-full sqlitebrowser ruby-dev pngtools pngcheck yara ltrace btop htop qemu-utils jq fq sqlite3 ghex cmake pkg-config libsecret-1-dev clamav ffmpeg fdisk testdisk extundelete
+  sudo nala install -y python3 python3-pip libpython3.10-dev python2 python2-dev libpython2.7-dev binwalk exiftool csvkit tree curl git wget build-essential libssl-dev unrar nmap whois p7zip-full sqlitebrowser ruby-dev pngtools pngcheck yara ltrace btop htop qemu-utils jq fq sqlite3 ghex cmake pkg-config libsecret-1-dev clamav ffmpeg fdisk testdisk extundelete bat
   sudo nala install -y fonts-powerline
 }
 
-install_python_environments() {
+install_base_python_environments(){
   # Setup python environments (I need python 2 & 3 to run all forensic tools)
   echo "Setting up Python 2 & 3 environments"
   TARGET_LINK="/usr/bin/python"
@@ -40,13 +40,13 @@ install_python_environments() {
   python3 -m pip install virtualenv
 }
 
-install_rust() {
+install_base_rust(){
   echo "Setting up Rust environment"
   curl https://sh.rustup.rs -sSf | sh -s -- -y
   source "$HOME/.cargo/env"
 }
 
-install_terminator() {
+install_base_terminator(){
   echo "Setting up Terminator"
   sudo nala install -y terminator
   sudo mkdir -p /etc/xdg/terminator
@@ -81,7 +81,7 @@ install_terminator() {
 EOF
 }
 
-install_zsh() {
+install_base_zsh(){
   echo "Setting up zsh and oh-my-zsh"
   sudo nala install -y zsh
   OH_MY_ZSH_FOLDER="$HOME/.oh-my-zsh"
@@ -95,33 +95,82 @@ install_zsh() {
   sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="steeef"/g' ~/.zshrc
 }
 
-install_sublime_text() {
-# Install Sublime Text
-wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/sublimehq-archive.gpg > /dev/null
-echo "deb https://download.sublimetext.com/ apt/stable/" | sudo tee /etc/apt/sources.list.d/sublime-text.list
-sudo nala update
-sudo nala install -y sublime-text
+install_base_sublime_text(){
+  echo "Setting up Sublime Text"
+  wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/sublimehq-archive.gpg > /dev/null
+  echo "deb https://download.sublimetext.com/ apt/stable/" | sudo tee /etc/apt/sources.list.d/sublime-text.list
+  sudo nala update
+  sudo nala install -y sublime-text
 }
 
+install_steg_stegoveritas(){
+  echo "Setting up Stegoveritas"
+  sudo python3 -m pip install stegoveritas
+  stegoveritas_install_deps
+  # => TODO: fix error messages
+}
 
-##################################################
-# Steganography tools
-##################################################
-# Stegoveritas
-sudo python3 -m pip install stegoveritas
-stegoveritas_install_deps
-# => TODO: fix error messages
+install_steg_stegseek(){
+  echo "Setting up Stegseek"
+  sudo nala install -y libjpeg62
+  cd /tmp
+  wget https://github.com/RickdeJager/stegseek/releases/download/v0.6/stegseek_0.6-1.deb
+  sudo dpkg -i stegseek_0.6-1.deb
+}
 
-# Stegseek
-sudo nala install -y libjpeg62
-cd /tmp
-wget https://github.com/RickdeJager/stegseek/releases/download/v0.6/stegseek_0.6-1.deb
-sudo dpkg -i stegseek_0.6-1.deb
+install_steg_zsteg(){
+  echo "Setting up Zsteg"
+  sudo gem install rake
+  sudo gem install zsteg
+}
 
-# Zsteg
-sudo gem install rake
-sudo gem install zsteg
+install_tools_category(){
+    prefix=$1
+    functions_with_prefix=$(declare -F | awk -v prefix="$prefix" '$3 ~ "^" prefix { print $3 }')
+    
+    # Iterate over each function with the prefix and execute it
+    for func in $functions_with_prefix; do
+        $func
+    done
+}
 
+install_all(){
+  install_base_baseline_tools
+  install_base_python_environments
+  install_base_rust
+  install_base_terminator
+  install_base_zsh
+  install_base_sublime_text
+  install_tools_category "install_steg_"
+}
+
+display_help(){
+    echo "Usage: $0 [OPTION]"
+    echo "Install tools for forensic analysis environment."
+    echo
+    echo "Options:"
+    echo "  -h, --help         Display this help and exit"
+    echo "  -a, --all          Install all available tools"
+    echo "  --steg             Install all steganography tools"
+}
+
+main() {
+    if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+        display_help
+        exit 0
+    elif [[ "$1" == "-a" || "$1" == "--all" ]]; then
+        install_all
+        exit 0
+    elif [[ "$1" == "--steg" ]]; then
+        install_tools_category "install_steg_"
+        exit 0
+    else
+        echo "Invalid option. Use -h or --help for usage information."
+        exit 1
+    fi
+}
+
+exit(0)
 ##################################################
 # Containers tools
 ##################################################
@@ -309,6 +358,7 @@ alias ll="ls -al"
 alias vol=vol3
 alias rdpieces="perl /opt/rdpieces/rdpieces.pl \$@"
 alias PyWMIPersistenceFinder="python2 /opt/WMI_Forensics/PyWMIPersistenceFinder.py \$@"
+alias cat=/usr/bin/batcat
 
 SAVEHIST=1000000
 HISTSIZE=1000000
