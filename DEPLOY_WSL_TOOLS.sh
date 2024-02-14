@@ -16,30 +16,30 @@ install_base_baseline_tools(){
 }
 
 install_base_python_environments(){
-  # Setup python environments (I need python 2 & 3 to run all forensic tools)
+  # Setup python environments (python 2 & 3 needed to run all forensic tools)
   echo "[$(date +%H:%M:%S)]: Setting up Python 2 & 3 environments"
   TARGET_LINK="/usr/bin/python"
   SOURCE_LINK="/usr/bin/python3"
-  echo "Testing Python3 symbolic link"
+  echo "[$(date +%H:%M:%S)]: Testing Python3 symbolic link"
   if [ -L "$TARGET_LINK" ]; then
-    echo "Symbolic link '$TARGET_LINK' already exists. Skipping..."
+    echo "[$(date +%H:%M:%S)]: Symbolic link '$TARGET_LINK' already exists. Skipping..."
   else
+    echo "[$(date +%H:%M:%S)]: Symbolic link '$TARGET_LINK' doesn't exists. Setting up..."
     sudo ln -s "$SOURCE_LINK" "$TARGET_LINK"
     
     # Check the exit status of the ln command
     if [ $? -eq 0 ]; then
-      echo "Symbolic link created successfully: $TARGET_LINK -> $SOURCE_LINK"
+      echo "[$(date +%H:%M:%S)]: Symbolic link created successfully: $TARGET_LINK -> $SOURCE_LINK"
     else
-      echo "Failed to create symbolic link: $TARGET_LINK. Check for errors."
+      echo "[$(date +%H:%M:%S)]: Failed to create symbolic link: $TARGET_LINK. Check for errors."
     fi
   fi
-
   mkdir -p $VENVS_PATH
-  curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output /tmp/get-pip.py
-  sudo python2 /tmp/get-pip.py
+  curl -s https://bootstrap.pypa.io/pip/2.7/get-pip.py --output /tmp/get-pip.py
+  sudo python2 /tmp/get-pip.py > $OUTPUT 2> $OUTPUT
   rm /tmp/get-pip.py
-  python2 -m pip install virtualenv
-  python3 -m pip install virtualenv
+  python2 -m pip install virtualenv --no-warn-script-location > $OUTPUT 2> $OUTPUT
+  python3 -m pip install virtualenv --no-warn-script-location > $OUTPUT
 }
 
 install_base_rust(){
@@ -48,7 +48,21 @@ install_base_rust(){
   source "$HOME/.cargo/env"
 }
 
-install_base_terminator(){
+install_base_zsh(){
+  echo "Setting up zsh and oh-my-zsh"
+  sudo apt-get install -qq -y zsh
+  OH_MY_ZSH_FOLDER="$HOME/.oh-my-zsh"
+  echo "Checking if the oh-my-zsh folder already exists..."
+  if [ -d "$OH_MY_ZSH_FOLDER" ]; then
+    echo "The '$OH_MY_ZSH_FOLDER' folder already exists. Skipping the installation of oh-my-zsh..."
+  else
+    echo "The '$OH_MY_ZSH_FOLDER' folder does not exist. Proceeding with the installation of oh-my-zsh..."
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+  fi
+  sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="steeef"/g' ~/.zshrc
+}
+
+install_optional_terminator(){
   echo "Setting up Terminator"
   sudo apt-get install -qq -y terminator
   sudo mkdir -p /etc/xdg/terminator
@@ -83,21 +97,7 @@ install_base_terminator(){
 EOF
 }
 
-install_base_zsh(){
-  echo "Setting up zsh and oh-my-zsh"
-  sudo apt-get install -qq -y zsh
-  OH_MY_ZSH_FOLDER="$HOME/.oh-my-zsh"
-  echo "Checking if the oh-my-zsh folder already exists..."
-  if [ -d "$OH_MY_ZSH_FOLDER" ]; then
-    echo "The '$OH_MY_ZSH_FOLDER' folder already exists. Skipping the installation of oh-my-zsh..."
-  else
-    echo "The '$OH_MY_ZSH_FOLDER' folder does not exist. Proceeding with the installation of oh-my-zsh..."
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-  fi
-  sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="steeef"/g' ~/.zshrc
-}
-
-install_base_sublime_text(){
+install_optional_sublime_text(){
   echo "Setting up Sublime Text"
   wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/sublimehq-archive.gpg > /dev/null
   echo "deb https://download.sublimetext.com/ apt/stable/" | sudo tee /etc/apt/sources.list.d/sublime-text.list
@@ -140,11 +140,11 @@ install_tools_category(){
 
 install_everything(){
   install_base_baseline_tools
-  #install_base_python_environments
+  install_base_python_environments
   #install_base_rust
-  #install_base_terminator
   #install_base_zsh
-  #install_base_sublime_text
+  #install_optional_terminator
+  #install_optional_sublime_text
   #install_tools_category "install_steg_"
 }
 
@@ -189,6 +189,7 @@ main(){
         exit 0
         ;;
       --steg)
+        install_tools_category "install_base_"
         install_tools_category "install_steg_"
         exit 0
         ;;
@@ -440,6 +441,7 @@ git clone https://github.com/dkovar/analyzeMFT
 # Add 3rd party tools to PATH + some setups
 ##################################################
 cat <<EOT >> ~/.zshrc
+path+=('$HOME/.local/bin')
 path+=('/opt/DidierStevensSuite/')
 path+=('/opt/john/run/')
 path+=('/opt/bmc-tools/')
