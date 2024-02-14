@@ -1,47 +1,45 @@
 #!/bin/bash
 
+# Global variables
 VENVS_PATH="/opt/venvs"
+VERBOSE=false
+OUTPUT="/dev/null" # quiet mode by default
 
 # Get 3rd party tools in /opt
 sudo chown $USER:$USER /opt
 
 install_base_baseline_tools(){
-  echo "Installing baseline tools"
-  {
-    sudo apt update
-    sudo apt install -y nala
-    sudo nala install -y python3 python3-pip libpython3.10-dev python2 python2-dev libpython2.7-dev binwalk exiftool csvkit tree curl git wget build-essential libssl-dev unrar nmap whois p7zip-full sqlitebrowser ruby-dev pngtools pngcheck yara ltrace btop htop qemu-utils jq fq sqlite3 ghex cmake pkg-config libsecret-1-dev clamav ffmpeg fdisk testdisk extundelete bat
-    sudo nala install -y fonts-powerline
-  } 2> /dev/null
+  echo "[$(date +%H:%M:%S)]: Installing baseline tools"
+  sudo apt-get update > $OUTPUT
+  sudo apt-get install -y nala > $OUTPUT
+  sudo nala install -y python3 python3-pip libpython3.10-dev python2 python2-dev libpython2.7-dev binwalk exiftool csvkit tree curl git wget build-essential libssl-dev unrar nmap whois p7zip-full sqlitebrowser ruby-dev pngtools pngcheck yara ltrace btop htop qemu-utils jq fq sqlite3 ghex cmake pkg-config libsecret-1-dev clamav ffmpeg fdisk testdisk extundelete bat fonts-powerline > $OUTPUT
 }
 
 install_base_python_environments(){
   # Setup python environments (I need python 2 & 3 to run all forensic tools)
-  echo "Setting up Python 2 & 3 environments"
-  {
-    TARGET_LINK="/usr/bin/python"
-    SOURCE_LINK="/usr/bin/python3"
-    echo "Testing Python3 symbolic link"
-    if [ -L "$TARGET_LINK" ]; then
-        echo "Symbolic link '$TARGET_LINK' already exists. Skipping..."
+  echo "[$(date +%H:%M:%S)]: Setting up Python 2 & 3 environments"
+  TARGET_LINK="/usr/bin/python"
+  SOURCE_LINK="/usr/bin/python3"
+  echo "Testing Python3 symbolic link"
+  if [ -L "$TARGET_LINK" ]; then
+    echo "Symbolic link '$TARGET_LINK' already exists. Skipping..."
+  else
+    sudo ln -s "$SOURCE_LINK" "$TARGET_LINK"
+    
+    # Check the exit status of the ln command
+    if [ $? -eq 0 ]; then
+      echo "Symbolic link created successfully: $TARGET_LINK -> $SOURCE_LINK"
     else
-        sudo ln -s "$SOURCE_LINK" "$TARGET_LINK"
-        
-        # Check the exit status of the ln command
-        if [ $? -eq 0 ]; then
-            echo "Symbolic link created successfully: $TARGET_LINK -> $SOURCE_LINK"
-        else
-            echo "Failed to create symbolic link: $TARGET_LINK. Check for errors."
-        fi
+      echo "Failed to create symbolic link: $TARGET_LINK. Check for errors."
     fi
+  fi
 
-    mkdir -p $VENVS_PATH
-    curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output /tmp/get-pip.py
-    sudo python2 /tmp/get-pip.py
-    rm /tmp/get-pip.py
-    python2 -m pip install virtualenv
-    python3 -m pip install virtualenv
-  } 2> /dev/null
+  mkdir -p $VENVS_PATH
+  curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output /tmp/get-pip.py
+  sudo python2 /tmp/get-pip.py
+  rm /tmp/get-pip.py
+  python2 -m pip install virtualenv
+  python3 -m pip install virtualenv
 }
 
 install_base_rust(){
@@ -52,7 +50,7 @@ install_base_rust(){
 
 install_base_terminator(){
   echo "Setting up Terminator"
-  sudo nala install -y terminator
+  sudo apt-get install -qq -y terminator
   sudo mkdir -p /etc/xdg/terminator
   sudo sh -c "cat >> /etc/xdg/terminator/config" <<-EOF
   [global_config]
@@ -87,14 +85,14 @@ EOF
 
 install_base_zsh(){
   echo "Setting up zsh and oh-my-zsh"
-  sudo nala install -y zsh
+  sudo apt-get install -qq -y zsh
   OH_MY_ZSH_FOLDER="$HOME/.oh-my-zsh"
   echo "Checking if the oh-my-zsh folder already exists..."
   if [ -d "$OH_MY_ZSH_FOLDER" ]; then
-      echo "The '$OH_MY_ZSH_FOLDER' folder already exists. Skipping the installation of oh-my-zsh..."
+    echo "The '$OH_MY_ZSH_FOLDER' folder already exists. Skipping the installation of oh-my-zsh..."
   else
-      echo "The '$OH_MY_ZSH_FOLDER' folder does not exist. Proceeding with the installation of oh-my-zsh..."
-      sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+    echo "The '$OH_MY_ZSH_FOLDER' folder does not exist. Proceeding with the installation of oh-my-zsh..."
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
   fi
   sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="steeef"/g' ~/.zshrc
 }
@@ -103,8 +101,8 @@ install_base_sublime_text(){
   echo "Setting up Sublime Text"
   wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/sublimehq-archive.gpg > /dev/null
   echo "deb https://download.sublimetext.com/ apt/stable/" | sudo tee /etc/apt/sources.list.d/sublime-text.list
-  sudo nala update
-  sudo nala install -y sublime-text
+  sudo nala update -qq
+  sudo apt-get install -qq -y sublime-text
 }
 
 install_steg_stegoveritas(){
@@ -118,7 +116,7 @@ install_steg_stegoveritas(){
 
 install_steg_stegseek(){
   echo "Setting up Stegseek"
-  sudo nala install -y libjpeg62
+  sudo apt-get install -qq -y libjpeg62
   cd /tmp
   wget https://github.com/RickdeJager/stegseek/releases/download/v0.6/stegseek_0.6-1.deb
   sudo dpkg -i stegseek_0.6-1.deb
@@ -131,54 +129,147 @@ install_steg_zsteg(){
 }
 
 install_tools_category(){
-    prefix=$1
-    functions_with_prefix=$(declare -F | awk -v prefix="$prefix" '$3 ~ "^" prefix { print $3 }')
-    
-    # Iterate over each function with the prefix and execute it
-    for func in $functions_with_prefix; do
-        $func
-    done
+  prefix=$1
+  functions_with_prefix=$(declare -F | awk -v prefix="$prefix" '$3 ~ "^" prefix { print $3 }')
+  
+  # Iterate over each function with the prefix and execute it
+  for func in $functions_with_prefix; do
+    $func
+  done
 }
 
-install_all(){
+install_everything(){
   install_base_baseline_tools
-  install_base_python_environments
-  install_base_rust
-  install_base_terminator
-  install_base_zsh
-  install_base_sublime_text
-  install_tools_category "install_steg_"
+  #install_base_python_environments
+  #install_base_rust
+  #install_base_terminator
+  #install_base_zsh
+  #install_base_sublime_text
+  #install_tools_category "install_steg_"
 }
 
 display_help(){
-    echo "Usage: $0 [OPTION]"
-    echo "Install tools for forensic analysis environment."
-    echo
-    echo "Options:"
-    echo "  -h, --help         Display this help and exit"
-    echo "  -a, --all          Install all available tools"
-    echo "  --steg             Install all steganography tools"
+  echo "Usage: $0 [OPTION]"
+  echo "Install tools for forensic analysis environment."
+  echo
+  echo "Options:"
+  echo "  -h, --help         Display this help and exit"
+  echo "  -v, --verbose      Enable verbose mode (disabled by default)"
+  echo "  -a, --all          Install all tools"
+  echo "  --steg             Install all steganography tools"
+  echo
+  echo "Example commands:"
+  echo "  Install all tools:                    $0 -a"
+  echo "  Install all tools with verbose mode:  $0 -a -v"
+  echo "  Install Steganography tools:          $0 --steg"
 }
 
-main() {
-    if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+main(){
+  if [[ $# -eq 0 ]]; then
+    display_help
+    exit 0
+  fi
+
+  for arg in "$@"; do
+    case $arg in
+      -v|--verbose)
+        OUTPUT="/dev/stdout"
+        ;;
+    esac
+  done
+
+  for arg in "$@"; do
+    case $arg in
+      -h|--help)
         display_help
         exit 0
-    elif [[ "$1" == "-a" || "$1" == "--all" ]]; then
-        install_all
+        ;;
+      -a|--all)
+        install_everything
         exit 0
-    elif [[ "$1" == "--steg" ]]; then
+        ;;
+      --steg)
         install_tools_category "install_steg_"
         exit 0
-    else
-        echo "Invalid option. Use -h or --help for usage information."
+        ;;
+      -v)
+        # skip the invalid option error
+        ;;
+      *)
+        echo "Invalid option: $arg. Use -h or --help for usage information." >&2
         exit 1
-    fi
+        ;;
+    esac
+  done
 }
 
 main "$@"
 
 exit 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ##################################################
 # Containers tools
 ##################################################
@@ -219,13 +310,13 @@ fi
 # rdpieces
 cd /opt
 git clone https://github.com/brimorlabs/rdpieces
-sudo nala install -y libio-all-perl libdatetime-perl libdbd-sqlite3-perl
+sudo apt-get install -y libio-all-perl libdatetime-perl libdbd-sqlite3-perl
 
 ##################################################
 # Network tools
 ##################################################
 # Wireshark
-sudo DEBIAN_FRONTEND=noninteractive nala install -y wireshark
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y wireshark
 # Wireshark profiles
 # git clone the repo and put all profiles folder into ~/.config/wireshark/profiles
 # https://github.com/Dysnome/Wireshark-Profiles
@@ -241,13 +332,13 @@ sudo DEBIAN_FRONTEND=noninteractive nala install -y wireshark
 # Email tools
 ##################################################
 # mpack: munpack
-sudo nala install -y mpack libemail-outlook-message-perl
+sudo apt-get install -y mpack libemail-outlook-message-perl
 
 # pff-tools: pffexport
-sudo nala install -y pff-tools
+sudo apt-get install -y pff-tools
 
 # thunderbird => As of 2023-22-19, doesn't work pretty well on WSL
-sudo nala install -y thunderbird adwaita-icon-theme-full
+sudo apt-get install -y thunderbird adwaita-icon-theme-full
 
 ##################################################
 # EVTX tools
@@ -278,7 +369,7 @@ cargo build --release
 mkdir /opt/pdf
 
 # poppler-utils: pdfinfo, pdfsig, pdftotext, etc
-sudo nala install -y poppler-utils
+sudo apt-get install -y poppler-utils
 
 # peepdf
 cd /opt/pdf
