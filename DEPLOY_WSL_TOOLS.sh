@@ -1,100 +1,108 @@
 #!/bin/bash
 
-# Debug
-set -e
-cd $HOME
+VENVS_PATH="/opt/venvs"
 
 # Get 3rd party tools in /opt
 sudo chown $USER:$USER /opt
 
-# Update apt repo & install Nala (apt frontend)
-sudo apt update
-sudo apt install -y nala
+install_baseline_tools() {
+  echo "Installing baseline tools"
+  sudo apt update
+  sudo apt install -y nala
+  sudo nala install -y python3 python3-pip libpython3.10-dev python2 python2-dev libpython2.7-dev binwalk exiftool csvkit tree curl git wget build-essential libssl-dev unrar nmap whois p7zip-full sqlitebrowser ruby-dev pngtools pngcheck yara ltrace btop htop qemu-utils jq fq sqlite3 ghex cmake pkg-config libsecret-1-dev clamav ffmpeg fdisk testdisk extundelete
+  sudo nala install -y fonts-powerline
+}
 
-# Install base tools
-sudo nala install -y python3 python3-pip libpython3.10-dev python2 python2-dev libpython2.7-dev binwalk exiftool csvkit tree curl git wget build-essential libssl-dev unrar nmap whois p7zip-full sqlitebrowser ruby-dev pngtools pngcheck yara ltrace btop htop qemu-utils jq fq sqlite3 ghex cmake pkg-config libsecret-1-dev clamav ffmpeg fdisk testdisk extundelete
+install_python_environments() {
+  # Setup python environments (I need python 2 & 3 to run all forensic tools)
+  echo "Setting up Python 2 & 3 environments"
+  TARGET_LINK="/usr/bin/python"
+  SOURCE_LINK="/usr/bin/python3"
+  echo "Testing Python3 symbolic link"
+  if [ -L "$TARGET_LINK" ]; then
+      echo "Symbolic link '$TARGET_LINK' already exists. Skipping..."
+  else
+      sudo ln -s "$SOURCE_LINK" "$TARGET_LINK"
+      
+      # Check the exit status of the ln command
+      if [ $? -eq 0 ]; then
+          echo "Symbolic link created successfully: $TARGET_LINK -> $SOURCE_LINK"
+      else
+          echo "Failed to create symbolic link: $TARGET_LINK. Check for errors."
+      fi
+  fi
 
-# Some fancy improvement
-sudo nala install -y fonts-powerline
+  mkdir -p $VENVS_PATH
+  curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output /tmp/get-pip.py
+  sudo python2 /tmp/get-pip.py
+  rm /tmp/get-pip.py
+  python2 -m pip install virtualenv
+  python3 -m pip install virtualenv
+}
 
-# Setup python environments (I need python 2 & 3 to run all forensic tools)
-TARGET_LINK="/usr/bin/python"
-SOURCE_LINK="/usr/bin/python3"
-echo "Testing Python3 symbolic link"
-if [ -L "$TARGET_LINK" ]; then
-    echo "Symbolic link '$TARGET_LINK' already exists. Skipping..."
-else
-    sudo ln -s "$SOURCE_LINK" "$TARGET_LINK"
-    
-    # Check the exit status of the ln command
-    if [ $? -eq 0 ]; then
-        echo "Symbolic link created successfully: $TARGET_LINK -> $SOURCE_LINK"
-    else
-        echo "Failed to create symbolic link: $TARGET_LINK. Check for errors."
-    fi
-fi
-mkdir -p /home/$USER/venvs
-curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output /tmp/get-pip.py
-sudo python2 /tmp/get-pip.py
-rm /tmp/get-pip.py
-python2 -m pip install virtualenv
-python3 -m pip install virtualenv
+install_rust() {
+  echo "Setting up Rust environment"
+  curl https://sh.rustup.rs -sSf | sh -s -- -y
+  source "$HOME/.cargo/env"
+}
 
-# Setup rust environment
-curl https://sh.rustup.rs -sSf | sh -s -- -y
-source "$HOME/.cargo/env"
-
-# Setup terminator
-sudo nala install -y terminator
-sudo mkdir -p /etc/xdg/terminator
-sudo sh -c "cat >> /etc/xdg/terminator/config" <<-EOF
-[global_config]
-  suppress_multiple_term_dialog = True
-[keybindings]
-  new_tab = <Primary>t
-  split_horiz = F1
-  split_vert = F2
-  close_term = F3
-  paste = <Primary>v
-  close_window = None
-  help = None
-[profiles]
-  [[default]]
-    background_darkness = 0.95
-    background_type = transparent
-    cursor_color = "#aaaaaa"
-    foreground_color = "#00ff00"
-    scrollback_infinite = True
-    split_to_group = True
-[layouts]
-  [[default]]
-    [[[window0]]]
-      type = Window
-      parent = ""
-    [[[child1]]]
-      type = Terminal
-      parent = window0
-[plugins]
+install_terminator() {
+  echo "Setting up Terminator"
+  sudo nala install -y terminator
+  sudo mkdir -p /etc/xdg/terminator
+  sudo sh -c "cat >> /etc/xdg/terminator/config" <<-EOF
+  [global_config]
+    suppress_multiple_term_dialog = True
+  [keybindings]
+    new_tab = <Primary>t
+    split_horiz = F1
+    split_vert = F2
+    close_term = F3
+    paste = <Primary>v
+    close_window = None
+    help = None
+  [profiles]
+    [[default]]
+      background_darkness = 0.95
+      background_type = transparent
+      cursor_color = "#aaaaaa"
+      foreground_color = "#00ff00"
+      scrollback_infinite = True
+      split_to_group = True
+  [layouts]
+    [[default]]
+      [[[window0]]]
+        type = Window
+        parent = ""
+      [[[child1]]]
+        type = Terminal
+        parent = window0
+  [plugins]
 EOF
+}
 
-# Setup ZSH
-sudo nala install -y zsh
-OH_MY_ZSH_FOLDER="$HOME/.oh-my-zsh"
-echo "Checking if the oh-my-zsh folder already exists..."
-if [ -d "$OH_MY_ZSH_FOLDER" ]; then
-    echo "The '$OH_MY_ZSH_FOLDER' folder already exists. Skipping the installation of oh-my-zsh..."
-else
-    echo "The '$OH_MY_ZSH_FOLDER' folder does not exist. Proceeding with the installation of oh-my-zsh..."
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-fi
-sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="steeef"/g' ~/.zshrc
-#source ~/.zshrc
+install_zsh() {
+  echo "Setting up zsh and oh-my-zsh"
+  sudo nala install -y zsh
+  OH_MY_ZSH_FOLDER="$HOME/.oh-my-zsh"
+  echo "Checking if the oh-my-zsh folder already exists..."
+  if [ -d "$OH_MY_ZSH_FOLDER" ]; then
+      echo "The '$OH_MY_ZSH_FOLDER' folder already exists. Skipping the installation of oh-my-zsh..."
+  else
+      echo "The '$OH_MY_ZSH_FOLDER' folder does not exist. Proceeding with the installation of oh-my-zsh..."
+      sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+  fi
+  sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="steeef"/g' ~/.zshrc
+}
 
+install_sublime_text() {
 # Install Sublime Text
 wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/sublimehq-archive.gpg > /dev/null
 echo "deb https://download.sublimetext.com/ apt/stable/" | sudo tee /etc/apt/sources.list.d/sublime-text.list
 sudo nala update
 sudo nala install -y sublime-text
+}
+
 
 ##################################################
 # Steganography tools
